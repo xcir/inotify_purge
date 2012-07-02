@@ -32,14 +32,14 @@ use Error qw(:try);
 
 #settings
 
-#monitored file(regex)
-my $accept_regex	='\.(gif|jpg|png|php|txt|pl|html?)\Z';
-
 #monitored root dir
 my $watch_dir		 = '/var/www/html';
 
 #replace rule(src)
-my $src_regex		='^/var/www/html';
+my $src_regex		="^$watch_dir";
+
+#monitored file(regex)
+my $accept_regex	='\.(gif|jpg|png|php|txt|pl|html?)\Z';
 
 #replace rule(dest)
 my $dest_regex		='';

@@ -1,0 +1,43 @@
+Automatically purge request.(use Inotify event)
+
+[execute]
+
+./inopurge.pl
+
+[minimum settings]
+
+$watch_dir
+	monitored root dir
+
+$accept_regex
+	monitored file
+
+%varnish_host
+	varnish server list
+	ex)
+		$varnish_host{"192.168.1.199:6081"}=1;
+		$varnish_host{"192.168.1.199:6082"}=1;
+
+[sample vcl]
+sub vcl_recv{
+	if(req.request == "PURGE"){
+		ban("req.url ~ " + req.url);
+		error 200 "purged.";
+	}
+}
+
+[sample]
+
+[root@localhost inotify_purge]# ./inopurge.pl
+#start:2012/7/3 1:32:43
+
+<<<< (othr terminal)rm /var/www/html/bg2.png
+
+#purge-start:2012/7/3 1:34:40
+#purge-success:192.168.1.199:6081 ^/bg2.png(\\?[^/]+)?$ (200:purged.)
+#purge-end:2012/7/3 1:34:40
+
+<<<< exit(ctrl+c)
+#ABORT:2012/7/3 1:35:5
+#THREAD-ABORT:112/6/3 1:35:5
+
