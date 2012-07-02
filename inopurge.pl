@@ -20,6 +20,16 @@ use threads::shared;
 use Error qw(:try);
 
 ########################################################################
+#
+
+#//sample varnish vcl settings
+#sub vcl_recv{
+#	if(req.request == "PURGE"){
+#		ban("req.url ~ " + req.url);
+#		error 200 "purged.";
+#	}
+#}
+
 #settings
 
 #monitored file(regex)
@@ -34,9 +44,10 @@ my $src_regex		='^/var/www/html';
 #replace rule(dest)
 my $dest_regex		='';
 
-#varnish server list
+#varnish server list (key = Host:Port Value = true/false)
 my %varnish_host	=();
-	$varnish_host{"192.168.1.199"}=6081;
+	$varnish_host{"192.168.1.199:6081"}=1;
+#	$varnish_host{"192.168.1.199:6082"}=1; #multiple server
 
 #alias conversion
 my %alias			=();
@@ -195,10 +206,19 @@ sub req_gen{
 #send to purge
 sub purge_varnish{
 	my($url)=@_;
-	while ( my ($host, $port) = each(%varnish_host) ) {
+	my @spl;my $port;my $host;
+	while ( my ($raw, $mode) = each(%varnish_host) ) {
+		if(!$mode){next;}
+		@spl = split(/:/, $raw);
+		$host = $spl[0];
+		if(@spl == 1){
+			$port = 80;
+		}else{
+			$port = $spl[1];
+		}
 		my $varnish=Net::HTTP->new(
-			Host		=> $host,
-			PeerPort	=> $port || 80,
+			Host		=> $spl[0],
+			PeerPort	=> $port,
 			Timeout		=> 2
 		);
 		try{
