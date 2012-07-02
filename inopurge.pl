@@ -217,7 +217,7 @@ sub purge_varnish{
 			$port = $spl[1];
 		}
 		my $varnish=Net::HTTP->new(
-			Host		=> $spl[0],
+			Host		=> $host,
 			PeerPort	=> $port,
 			Timeout		=> 2
 		);
